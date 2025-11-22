@@ -8,6 +8,7 @@ env/
 venv/
 .env/
 .venv/
+MAIN_PY_EXPLANATION.md
 
 # Pytest
 .pytest_cache/
