@@ -21,7 +21,7 @@ def cleanup():
 
 def run_tests():
     """Runs pytest with cache disabled."""
-    print("🚀 Running tests...")
+    print("Running tests...")
     
     # Set environment variable to stop .pyc generation
     env = os.environ.copy()
@@ -37,7 +37,7 @@ def run_tests():
         print("\nInterrupted.")
         return 1
     finally:
-        print("🧹 Cleaning up...")
+        print("Cleaning up...")
         cleanup()
 
 if __name__ == "__main__":
