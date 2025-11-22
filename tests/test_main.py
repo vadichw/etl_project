@@ -8,22 +8,17 @@ from pathlib import Path
 # Add project root to sys.path to import main
 sys.path.append(str(Path(__file__).parent.parent))
 
-from main import process_data, load_to_db, get_ltv_report, USERS_FILE, ORDERS_FILE
+from main import process_data, load_to_db, get_ltv_report
 
 # Mock data for testing
 @pytest.fixture
 def setup_test_data(tmp_path):
     """Creates temporary test data files."""
-    # Override global constants in main (monkeypatching would be better but simple assignment works for this scope if we are careful, 
-    # but since we import constants, we need to patch the files where they are used or just overwrite the files if they are paths.
-    # However, main.py uses global constants. Let's use the actual files for simplicity or better, mock the file reading.
-    # Given the structure, let's just create the actual files in the data directory for the test, 
-    # but wait, the script uses hardcoded 'data/' dir. 
-    # Let's rely on the generate_dummy_data logic but strictly control the input for tests.
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
     
-    # Actually, process_data reads from USERS_FILE and ORDERS_FILE. 
-    # We should probably mock these paths or just overwrite the files with known test data.
-    # Since this is a simple project, let's overwrite the files with specific test cases.
+    users_file = data_dir / 'users.json'
+    orders_file = data_dir / 'orders.csv'
     
     # 1. Users
     users = [
@@ -31,7 +26,7 @@ def setup_test_data(tmp_path):
         {"user_id": 1, "name": "Alice", "email": "alice_new@example.com", "reg_date": "2023-01-10"}, # Duplicate, newer
         {"user_id": 2, "name": "Bob", "email": "bob@example.com", "reg_date": "2023-01-05"}
     ]
-    pd.DataFrame(users).to_json(USERS_FILE, orient='records')
+    pd.DataFrame(users).to_json(users_file, orient='records')
 
     # 2. Orders
     orders_data = [
@@ -42,16 +37,14 @@ def setup_test_data(tmp_path):
         [105, 99, 'Ghost', 10, 1, '2023-02-05']      # Non-existent user
     ]
     orders_df = pd.DataFrame(orders_data, columns=['order_id', 'user_id', 'item_name', 'item_price', 'quantity', 'order_date'])
-    orders_df.to_csv(ORDERS_FILE, index=False)
+    orders_df.to_csv(orders_file, index=False)
 
-    yield
-
-    # Cleanup (optional, maybe leave for inspection)
-    pass
+    return data_dir
 
 def test_process_data(setup_test_data):
     """Test data cleaning and transformation logic."""
-    users, orders = process_data()
+    data_dir = setup_test_data
+    users, orders = process_data(data_dir)
 
     # 1. Check User Deduplication
     assert len(users) == 2, "Should have 2 unique users"
@@ -66,7 +59,8 @@ def test_process_data(setup_test_data):
 
 def test_load_to_db(setup_test_data, tmp_path):
     """Test loading data into SQLite."""
-    users, orders = process_data()
+    data_dir = setup_test_data
+    users, orders = process_data(data_dir)
     
     # Use a temporary file DB because :memory: is lost when connection closes
     db_file = tmp_path / "test_db.sqlite"
@@ -94,7 +88,8 @@ def test_load_to_db(setup_test_data, tmp_path):
 
 def test_ltv_report(setup_test_data, capsys, tmp_path):
     """Test LTV report generation (integration test)."""
-    users, orders = process_data()
+    data_dir = setup_test_data
+    users, orders = process_data(data_dir)
     db_file = tmp_path / "test_shop.db"
     db_name = str(db_file)
     
@@ -109,4 +104,3 @@ def test_ltv_report(setup_test_data, capsys, tmp_path):
     assert "1000" in output
     assert "Bob" in output
     assert "50" in output
-
