@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env/
+.venv/
+
+# Pytest
+.pytest_cache
+
+# Database
+*.db
+*.sqlite
+
+# Data (generated at runtime)
+data/
