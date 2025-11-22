@@ -1,6 +1,6 @@
 # ETL Project (Educational Demo)
 
-## 🎯 About the Project
+## About the Project
 This project is a **demonstration of a classic ETL pipeline** (Extract, Transform, Load) in Python.
 It simulates a real-world data engineering task:
 1.  We have "dirty" raw data (duplicates, input errors).
@@ -10,7 +10,7 @@ It simulates a real-world data engineering task:
 
 The script is fully **autonomous**: it generates its own initial test data on every run, so you don't need to download any extra files.
 
-## ⚙️ How It Works (Workflow)
+## How It Works (Workflow)
 The entire process is executed in `main.py` and consists of 4 steps:
 
 1.  **Data Generation (`generate_dummy_data`)**:
@@ -69,7 +69,7 @@ To run tests without creating temporary cache files (`__pycache__`, `.pytest_cac
 python run_tests.py
 ```
 
-## 🐳 Docker Support
+## Docker Support
 You can run the project in a Docker container to ensure a consistent environment.
 
 1.  **Build the image**:
