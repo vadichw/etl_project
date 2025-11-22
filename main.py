@@ -101,6 +101,13 @@ def process_data(data_dir: Path) -> Optional[Tuple[pd.DataFrame, pd.DataFrame]]:
     if 'order_date' in df_orders.columns:
         df_orders['order_date'] = pd.to_datetime(df_orders['order_date'])
 
+    # Add user_name to orders for DB visibility
+    user_map = df_users.set_index('user_id')['name']
+    df_orders['user_name'] = df_orders['user_id'].map(user_map)
+
+    # Reorder columns to match desired DB structure
+    df_orders = df_orders[['order_id', 'user_id', 'user_name', 'item_name', 'item_price', 'quantity', 'order_date']]
+
     logging.info(f"   -> Orders loaded: {len(df_orders)} (Total dropped: {initial_orders_count - len(df_orders)})")
     logging.info(f"      - Invalid Price: {dropped_price}")
     logging.info(f"      - Invalid Quantity: {dropped_qty}")
@@ -128,6 +135,7 @@ def load_to_db(df_users: pd.DataFrame, df_orders: pd.DataFrame, db_name: str) ->
             CREATE TABLE IF NOT EXISTS orders (
                 order_id INTEGER PRIMARY KEY,
                 user_id INTEGER,
+                user_name TEXT,
                 item_name TEXT,
                 item_price REAL,
                 quantity INTEGER,
